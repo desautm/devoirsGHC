@@ -3,12 +3,12 @@ title: "T.P. Variables aléatoires et inférence statistique (Labo 2)"
 author: "Marc-André Désautels"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    toc: yes
-    toc_float: yes
   pdf_document:
     toc: no
     latex_engine: pdflatex
+  html_document:
+    toc: yes
+    toc_float: yes
 subtitle: "201-9F6-ST : Statistiques appliquées à l'informatique"
 institute: "Cégep Saint-Jean-sur-Richelieu"
 urlcolor: blue
@@ -71,205 +71,86 @@ Quelques exemples sont décrits ci-dessous:
 |$P(X=x)$|$C_x^np^xq^{n-x}$|$p(1-p)^x$|$e^{-\lambda}\frac{\lambda^x}{x!}$|
 |Commandes|`dbinom(x,n,p)`|`dgeom(x,p)`|`dpois(x,lambda)`|
 
+test
+
+|Loi|Uniforme|Exponentielle|Normale|
+|:---:|:-----:|:--------:|:------:|
+|Paramètres|$(a,b)\in\mathbb{R}^2,a<b$|$p\in]0,1[$|$\lambda>0$|
+<!-- |Paramètres|$(a,b)\in\mathbb{R}^2,a<b$|$\lambda>0$|$\mu\in\mathbb{R},\sigma>0$| -->
+<!-- |$X\sim$ | $U([a,b])$ | $E(\lambda)$ | $N(\mu,\sigma^2)$ | -->
+<!-- |Ch($X$) | $[a,b]$ | $[0,\infty]$ | $\mathbb{R}$ | -->
+<!-- |$P(X=x)$ | $\frac{1}{b-a}$ | $\lambda^{-\lambda x}$ | $\frac{1}{\sqrt{2\pi \sigma^2}}e^{\tfrac{-(x-\mu)^2}{2\sigma^2}}$ | -->
+<!-- |Commandes | `dunif(x,a,b)` | `dexp(x,lambda)` | `dnorm(x,mu,sigma)` | -->
+
+## Exemples de calculs
+
+Soit $X$ une variable aléatoire telle que $X\sim B(8,0.3)$.
+
+1. Pour calculer $P(X=4)$, nous devons utiliser la commande suivante:
+```{r}
+dbinom(4,8,0.3)
+```
+Ceci signifie que $P(X=4)=`r dbinom(4,8,0.3)`$.
+
+2. Pour calculer $P(X\leq 4)$, nous devons utiliser la commande suivante:
+```{r}
+pbinom(4,8,0.3)
+```
+Ceci signifie que $P(X\leq 4)=`r pbinom(4,8,0.3)`$.
+
+3. Pour calculer $P(X> 4)$, nous pouvons utiliser une des commandes suivantes:
+```{r}
+pbinom(4,8,0.3,lower.tail = FALSE)
+1-pbinom(4,8,0.3)
+```
+Ceci signifie que $P(X>4)=`r 1-pbinom(4,8,0.3)`$.
+
+4. Pour calculer $P(X\geq 4)=1-P(X\leq 3)$, nous pouvons utiliser la commande suivante:
+```{r}
+1-pbinom(3,8,0.3)
+```
+Ceci signifie que $P(X\geq 4)=`r 1-pbinom(3,8,0.3)`$.
+
+# Représentation graphique
+
 ## Les lois de probabilités discrètes
 
-### La loi binomiale
-
-Le _nom racine_ pour la loi binomiale est `binom`.
-
-Soit $X$: le nombre de succès en $n$ essais et $X\sim B(n,p)$. Voici la façon de calculer des probabilités pour la loi binomiale à l'aide de `R`:
-
-|Probabilités|Commande `R`|
-|-----------:|:-----------|
-|$P(X=k)$    |`dbinom(k, n, p)`|
-|$P(i\leq X \leq j)$ | `sum(dbinom(i:j, n, p))`|
-|$P(X\leq k)$ | `pbinom(k, n, p)` |
-|$P(X>k)$ | `1-pbinom(k, n, p)` |
-
-Soit $X$ la variable aléatoire comptant le nombre de face 2 que nous obtenons en lançant un dé à quatre reprises. Nous avons que $X\sim B(4,\frac{1}{6})$. Si nous voulons calculer $P(X=3)$, nous aurons:
+Nous pouvons représenter graphiquement la loi binomiale. Soit $X~B(8,0.3)$. Nous aurons:
 
 ```{r}
-dbinom(3,4,1/6)
-```
-
-Nous avons donc une probabilité de `r dbinom(3,4,1/6)*100`% d'obtenir 3 fois la face deux en lançant un dé à quatres reprises.
-
-Nous pouvons représenter graphiquement la loi binomiale. Soit $X~B(10,1/4)$. Nous aurons:
-
-```{r}
-fbinom <- data.frame(x = 0:10, y = dbinom(0:10, 10, 1/4))
+n <- 8
+p <- 0.3
+fbinom <- data.frame(x = 0:n, y = dbinom(0:n, n, p))
 ggplot(fbinom, aes(x = x, y = y)) +
-  geom_bar(width = 0.1, stat = "identity") +
+  geom_bar(width = 0.05, stat = "identity") +
   labs(
     x = "Nombre de succès",
     y = "Probabilité",
-    title = "Répartition de la probabilité de la loi binomiale en fonction du nombre de succès"
-  )
-```
-
-### La loi de Poisson
-
-Le _nom racine_ pour la loi de Poisson est `pois`.
-
-Soit $X$: le nombre d'événements dans un intervalle fixé et $X\sim Po(\lambda)$. Voici la façon de calculer des probabilités pour la loi de Poisson à l'aide de `R`:
-
-|Probabilités|Commande `R`|
-|-----------:|:-----------|
-|$P(X=k)$    |`dpois(k, lambda)`|
-|$P(i\leq X \leq j)$ | `sum(dpois(i:j, lambda))`|
-|$P(X\leq k)$ | `ppois(k, lambda)` |
-|$P(X>k)$ | `1-ppois(k, lambda)` |
-
-Soit $X$ le nombre d'erreurs dans une page. Si une page contient en moyenne une demie erreur alors $X\sim Po(1/2)$. Si nous voulons calculer $P(X=2)$, nous aurons:
-
-```{r}
-dpois(2, 1/2)
-```
-
-Nous avons donc une probabilité de `r dpois(2, 1/2)*100`% d'obtenir deux erreurs sur une page.
-
-Nous pouvons représenter graphiquement la loi de Poisson. Soit $X\sim Po(1/2)$. Nous aurons:
-
-```{r}
-fpois <- data.frame(x = 0:10, y = dpois(0:10, 1/2))
-ggplot(fpois, aes(x = x, y = y)) +
-  geom_bar(width = 0.1, stat = "identity") +
-  labs(
-    x = "Nombre d'événements",
-    y = "Probabilité",
-    title = "Répartition de la probabilité de la loi de Poisson en fonction du nombre d'événements"
-  )
-```
-
-### La loi géométrique
-
-Le _nom racine_ pour la loi géométrique est `geom`.
-
-Soit $X$: le nombre d'échecs avant d'obtenir un succès et $X\sim G(p)$. Voici la façon de calculer des probabilités pour la loi géométrique à l'aide de `R`:
-
-|Probabilités|Commande `R`|
-|-----------:|:-----------|
-|$P(X=k)$    |`dgeom(k, p)`|
-|$P(i\leq X \leq j)$ | `sum(dgeom(i:j, p))`|
-|$P(X\leq k)$ | `pgeom(k, p)` |
-|$P(X>k)$ | `1-pgeom(k, p)` |
-
-Soit $X$ le nombre d'échecs avant d'avoir un premier succès. Si la probabilité de succès est $\frac{1}{5}$ alors $X\sim G(1/5)$. Si nous voulons calculer $P(X=6)$, nous aurons:
-
-```{r}
-dgeom(6, 1/5)
-```
-
-Nous avons donc une probabilité de `r dgeom(6, 1/5)*100`% d'obtenir 6 échecs avant un premier succès.
-
-Nous pouvons représenter graphiquement la loi géométrique. Soit $X\sim G(1/5)$. Nous aurons:
-
-```{r}
-fgeom <- data.frame(x = 0:10, y = dgeom(0:10, 1/5))
-ggplot(fgeom, aes(x = x, y = y)) +
-  geom_bar(width = 0.1, stat = "identity") +
-  labs(
-    x = "Nombre d'événements",
-    y = "Probabilité",
-    title = "Répartition de la probabilité de la loi géométrique en fonction du nombre d'échecs avant le premier succès"
-  )
-```
-
-> Remarque : Pour la loi géométrique, on rencontre parfois cette définition : la probabilité p'(k) est la probabilité, lors d'une succession d'épreuves de Bernoulli indépendantes, d'obtenir k échecs avant un succès. On remarque qu'il ne s'agit que d'un décalage de la précédente loi géométrique. Si $X$ suit la loi $p$, alors $X+1$ suit la loi $p'$.
-
-### La loi hypergéométrique
-
-Le _nom racine_ pour la loi hypergéométrique est `hyper`.
-
-On tire sans remise $n$ objets d'un ensemble de $N$ objets dont $A$
-possèdent une caractéristique particulière (et les autres $B=N-A$ ne la possèdent pas). Soit $X$ le nombre d'objets de l'échantillon qui possèdent la caractéristique. Nous avons que $X\sim H(N,A,n)$.
-
-Voici la façon de calculer des probabilités pour la loi hypergéométrique à l'aide de `R`:
-
-|Probabilités|Commande `R`|
-|-----------:|:-----------|
-|$P(X=k)$    |`dhyper(k, A, B, n)`|
-|$P(i\leq X \leq j)$ | `sum(dhyper(i:j, A, B, n))`|
-|$P(X\leq k)$ | `phyper(k, A, B, n)` |
-|$P(X>k)$ | `1-phyper(k, A, B, n)` |
-
-Soit $X$ le nombre de boules blanches de l'échantillon de taille 4. Si l'urne contient 5 boules blanches et 8 boules noires, nous avons $X\sim H(13,5,4)$. Si nous voulons calculer $P(X=2)$, nous aurons:
-
-```{r}
-dhyper(2, 5, 8, 4)
-```
-
-Nous avons donc une probabilité de `r dhyper(2, 5, 8, 4)*100`% de piger 2 boules blanches dans un échantillon de taille 4.
-
-Nous pouvons représenter graphiquement la loi hypergéométrique. Soit $X\sim H(13,5,4)$. Nous aurons:
-
-```{r}
-fhyper <- data.frame(x = 0:4, y = dhyper(0:4, 5, 8, 4))
-ggplot(fhyper, aes(x = x, y = y)) +
-  geom_bar(width = 0.1, stat = "identity") +
-  labs(
-    x = "Nombre d'événements",
-    y = "Probabilité",
-    title = "Répartition de la probabilité de la loi hypergéométrique en fonction du nombre de boules blanches dans l'échantillon"
+    title = "Fonction de densité de B(8,0.3)"
   )
 ```
 
 ## Les lois de probabilités continues
 
-### La loi normale
-
-Le _nom racine_ pour la loi normale est `norm`.
-
-Si $X$ suit une loi normale de moyenne $\mu$ et de variance $\sigma^2$, nous avons $X\sim N(\mu,\sigma^2)$.
-
-Voici la façon de calculer des probabilités pour la loi normale à l'aide de `R`:
-
-|Probabilités|Commande `R`|
-|-----------:|:-----------|
-|$P(i\leq X \leq j)$ | `pnorm(j, mu, sigma)-pnorm(i, mu, sigma)`|
-|$P(X\leq k)$ | `pnorm(k, mu, sigma)` |
-|$P(X>k)$ | `1-pnorm(k, mu, sigma)` |
-
-Soit $X\sim N(3,25)$ une variable aléatoire suivant une loi normale de moyenne 3 et de variance 25. Si nous voulons calculer la probabilité $P(1.25<X<3.6)$ en `R`, nous pouvons utiliser la commande suivante:
+Nous pouvons représenter graphiquement la loi normale. Soit $X\sim N(5,1.5^2)$. Nous aurons:
 
 ```{r}
-pnorm(3.6, 3, 5) - pnorm(1.25, 3, 5)
+ggplot(data = data.frame(x = c(0, 10)), aes(x)) +
+  stat_function(fun = dnorm, args = list(mean = 5, sd = 1.5)) +
+  labs(
+    x = "x",
+    y = "f(x)",
+    title = "Fonction de densité de N(5,1.5^2)"
+  )
 ```
 
-La probabilité que notre variable aléatoire se trouve entre 1.25 et 3.6 est donc `r (pnorm(3.6, 3, 5) - pnorm(1.25, 3, 5))*100` %.
-
-Nous pouvons représenter graphiquement la loi normale. Soit $X\sim N(0,1)$. Nous aurons:
-
 ```{r}
-ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
-  stat_function(fun = dnorm, args = list(mean = 0, sd = 1))
-```
-
-###  La loi de Student
-
-Le _nom racine_ pour la loi de Student est `t`.
-
-Si $X$ suit une loi de Student à $\nu$ degrés de liberté, nous avons $X\sim T_{\nu}$.
-
-Voici la façon de calculer des probabilités pour la loi de Student à l'aide de `R`:
-
-|Probabilités|Commande `R`|
-|-----------:|:-----------|
-|$P(i\leq X \leq j)$ | `pt(j, nu)-pt(i, nu)`|
-|$P(X\leq k)$ | `pt(k, nu)` |
-|$P(X>k)$ | `1-pt(k, nu)` |
-
-Soit $X\sim T_5$ une variable aléatoire suivant une loi de Student à 5 degrés de liberté. Si nous voulons calculer la probabilité $P(X>3)$ en `R`, nous pouvons utiliser la commande suivante:
-
-```{r}
-1 - pt(3, 5)
-```
-
-La probabilité que notre variable aléatoire soit plus grande que 3 est donc `r (1 - pt(3, 5))*100` %.
-
-Nous pouvons représenter graphiquement la loi de Student. Soit $X\sim T_{5}$. Nous aurons:
-
-```{r}
-ggplot(data = data.frame(x = c(-4, 4)), aes(x)) +
-  stat_function(fun = dt, args = list(df = 5))
+ggplot(data = data.frame(x = c(-5, 20)), aes(x)) +
+  stat_function(fun = dnorm, args = list(mean = 10, sd = 3)) +
+  stat_function(fun = dnorm, args = list(mean = 8, sd = 5)) +
+  labs(
+    x = "x",
+    y = "f(x)",
+    title = ""
+  )
 ```
