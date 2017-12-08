@@ -17,6 +17,10 @@ urlcolor: blue
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
+library(questionr)
+library(titanic)
+library(knitr)
+titanic <- titanic_train
 ```
 
 # Instructions:
@@ -338,3 +342,100 @@ ggplot(fbinom, aes(x = x, y = y)) +
 
 # Créer un tableau de fréquences
 
+Pour créer un tableau de fréquences pour une variable aléatoire qualitative ou quantitative discrète, nous utilisons la commande `freq` de la librairie `questionr`.
+
+## Variable aléatoire qualitative ou quantitative discrète
+
+Par exemple, pour représenter le tableau de fréquences pour la variable `Sex` pour les données du Titanic, on pourrait utiliser la commande suivante:
+```{r}
+kable(freq(titanic$Sex,
+     exclud = NA,
+     cum = FALSE,
+     total = TRUE))
+```
+
+L'option `exclud = NA` permet d'exclure les valeurs manquantes, l'option `cum = FALSE` permet de ne **pas** afficher les pourcentages cumulés et l'option `total = TRUE` permet d'ajouter le total.
+
+## Variable aléatoire quantitative continue
+
+Par exemple, pour représenter le tableau de fréquences de la variable `Fare` (prix payé pour la croisière sur le Titanic) il faut tout d'abord créer le vecteur `Prix`  et créer de nouvelles classes (pour se faire, nous utilisons la commande `cut`). Ensuite, nous utilisons la commande `levels` pour renommer nos classes.
+```{r}
+Prix <- cut(titanic$Fare,breaks=c(0,20,40,60,80,600))
+levels(Prix) <- c("0$ à 20$","20$ à 40$","40$ à 60$","60$ à 80$","80$ à 600$")
+kable(freq(Prix,
+     exclud = NA,
+     cum = FALSE,
+     total = TRUE))
+```
+
+## Tableau de contingence
+
+Par exemple, pour représenter le tableau de contingence pour les variables `Fare` (prix payé pour la croisière sur le Titanic) et `Survived` (Survie au naufrage (0 = Non ; 1 = Oui)) il faut tout simplement se créer un vecteur pour la variable `Survived` en utilisant la commande suivante:
+```{r}
+Survie <- titanic$Survived
+```
+
+On peut afficher le tableau des fréquences obervées:
+```{r}
+addmargins(table(Survie,Prix))
+```
+
+ou alors le tableau des fréquences relatives:
+```{r}
+prop(table(Survie,Prix),digits=2)
+```
+
+# Estimation de paramètres et tests d'hypothèses
+
+## Estimation de paramètres
+
+## Test d'hypothèses
+
+### Test d'indépendance
+
+9. Nous voulons faire un test d'hypothèses pour savoir s'il y a une dépendance entre les variables `PClass` (qui indique la classe où se trouvait le passager à bord du Titanic) et `Survived` (qui indique si le passager survit (1) au naufrage ou meurt (0)).
+
+    a) Créez le vecteur `Classe` qui indique dans quelle classe se situait les passagers à bord du Titanic.
+
+    ```{r question9a}
+    Classe <- titanic$Pclass
+    ```
+
+    b) Créez le vecteur `Survie` qui indique si le passager est mort ou si il a survécu au naufrage du Titanic.
+    ```{r question9b}
+    Survie <- titanic$Survived
+    ```
+
+    c) Créez un tableau de fréquences observées des variables `Classe` et `Survie`.
+    ```{r question9c}
+    Tableau <- table(Classe,Survie)
+    ```
+
+    d) Affichez le tableau de fréquences observées des variables `Classe` et `Survie`.
+    ```{r question9d}
+    Tableau
+    ```
+
+    e) Dans cet échantillon, quel est le taux de mortalité en première classe?
+    ```{r question9e}
+    PropTableau <- prop(Tableau)
+    PropTableau
+    PropTableau[1,3]
+    ```
+    
+    f) Dans cet échantillon, quel est le taux de mortalité en première classe?
+    ```{r question9f}
+    PropTableau <- prop(Tableau)
+    PropTableau
+    PropTableau[3,3]
+    ```
+    
+    g) Faites un test d’indépendance du Khi-deux (test d’hypothèses) au seuil de signification de 0.5% avec le tableau, donnez votre décision et interprétez le résultat.(remarque : La commande pour faire un test d’indépendance du Khi-deux est `chisq.test(Tableau)`
+    ```{r question9g}
+    chisq.test(Tableau)
+    ```
+    
+    Puisque la p-value est plus petite que $`r chisq.test(Tableau)$p.value`$, alors nous rejettons $H_0$ et nous acceptons $H_1$. Ceci signifie qu'il y a un lien entre le fait qu'un passager survive et sa classe.
+
+10. 
+    
