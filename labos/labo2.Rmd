@@ -64,23 +64,20 @@ Si la loi de $X$ dépend d’un ou de plusieurs paramètres, disons `par1` et `p
 Quelques exemples sont décrits ci-dessous:
 
 |Loi|Binomiale|Géométrique|Poisson|
-|:---:|:-----:|:--------:|:------:|
+|:----------------:|:-----------------------:|:------------------------------:|:-------------------------:|
 |Paramètres|$n\in\mathbb{N}$, $p\in]0,1[$|$p\in]0,1[$|$\lambda>0$|
 |$X\sim$|$B(n;p)$|$G(p)$|$Po(\lambda)$|
 |Ch($X$)|$\left\{0,1,\ldots,n\right\}$|$\mathbb{N}$|$\mathbb{N}$|
 |$P(X=x)$|$C_x^np^xq^{n-x}$|$p(1-p)^x$|$e^{-\lambda}\frac{\lambda^x}{x!}$|
 |Commandes|`dbinom(x,n,p)`|`dgeom(x,p)`|`dpois(x,lambda)`|
 
-test
-
-|Loi|Uniforme|Exponentielle|Normale|
-|:---:|:-----:|:--------:|:------:|
-|Paramètres|$(a,b)\in\mathbb{R}^2,a<b$|$p\in]0,1[$|$\lambda>0$|
-<!-- |Paramètres|$(a,b)\in\mathbb{R}^2,a<b$|$\lambda>0$|$\mu\in\mathbb{R},\sigma>0$| -->
-<!-- |$X\sim$ | $U([a,b])$ | $E(\lambda)$ | $N(\mu,\sigma^2)$ | -->
-<!-- |Ch($X$) | $[a,b]$ | $[0,\infty]$ | $\mathbb{R}$ | -->
-<!-- |$P(X=x)$ | $\frac{1}{b-a}$ | $\lambda^{-\lambda x}$ | $\frac{1}{\sqrt{2\pi \sigma^2}}e^{\tfrac{-(x-\mu)^2}{2\sigma^2}}$ | -->
-<!-- |Commandes | `dunif(x,a,b)` | `dexp(x,lambda)` | `dnorm(x,mu,sigma)` | -->
+|    Loi   |     Uniforme    |      Exponentielle     |                  Normale                          |
+|:----------------:|:-----------------------:|:------------------------------:|:-------------------------:|
+|Paramètres|$(a,b)\in\mathbb{R}^2$|$p\in]0,1[$|$\lambda>0$|
+|$X\sim$ | $U([a,b])$ | $E(\lambda)$ | $N(\mu,\sigma^2)$ |
+|Ch($X$) | $[a,b]$ | $[0,\infty]$ | $\mathbb{R}$ |
+|$P(X=x)$ | $\frac{1}{b-a}$ | $\lambda^{-\lambda x}$ | $\dfrac{1}{\sqrt{2\pi \sigma^2}}e^{\frac{-(x-\mu)^2}{2\sigma^2}}$|
+|Commandes | `dunif(x,a,b)` | `dexp(x,lambda)` | `dnorm(x,mu,sigma)` |
 
 ## Exemples de calculs
 
@@ -122,7 +119,7 @@ n <- 8
 p <- 0.3
 fbinom <- data.frame(x = 0:n, y = dbinom(0:n, n, p))
 ggplot(fbinom, aes(x = x, y = y)) +
-  geom_bar(width = 0.05, stat = "identity") +
+  geom_bar(width = 0.05, stat = "identity", colour = "blue") +
   labs(
     x = "Nombre de succès",
     y = "Probabilité",
@@ -136,7 +133,7 @@ Nous pouvons représenter graphiquement la loi normale. Soit $X\sim N(5,1.5^2)$.
 
 ```{r}
 ggplot(data = data.frame(x = c(0, 10)), aes(x)) +
-  stat_function(fun = dnorm, args = list(mean = 5, sd = 1.5)) +
+  stat_function(fun = dnorm, args = list(mean = 5, sd = 1.5), colour = "blue") +
   labs(
     x = "x",
     y = "f(x)",
@@ -144,13 +141,200 @@ ggplot(data = data.frame(x = c(0, 10)), aes(x)) +
   )
 ```
 
+Nous pouvons également superposer plusieurs fonctions de densité. Par exemple, nous allons représenter la loi $N(10, 3^2)$ et la loi $N(8,5^2)$ sur le même graphique.
+
 ```{r}
 ggplot(data = data.frame(x = c(-5, 20)), aes(x)) +
-  stat_function(fun = dnorm, args = list(mean = 10, sd = 3)) +
-  stat_function(fun = dnorm, args = list(mean = 8, sd = 5)) +
+  stat_function(fun = dnorm, args = list(mean = 10, sd = 3), colour = "blue") +
+  stat_function(fun = dnorm, args = list(mean = 8, sd = 5), colour = "red") +
   labs(
     x = "x",
     y = "f(x)",
-    title = ""
+    title = "Les densités de N(10,3^2) et de N(8,5^2)"
   )
 ```
+
+Nous pouvons aussi superposer une variable aléatoire discrète et une variable aléatoire continue. Dans l'exemple suivant, nous avons la loi $B(100,0.2)$ et son approximation par la loi normale $N(20,4^2)$.
+
+```{r}
+n <- 100
+p <- 0.2
+m <- n*p
+s <- sqrt(n*p*(1-p))
+fbinom <- data.frame(x = 0:n, y = dbinom(0:n, n, p))
+ggplot(fbinom, aes(x = x, y = y)) +
+  geom_bar(width = 0.1, stat = "identity", colour = "blue") +
+  stat_function(fun = dnorm, args = list(mean = m, sd = s), colour = "red") +
+  labs(
+    x = "Nombre de succès",
+    y = "Probabilité",
+    title = "La loi B(100,0.2) et la loi N(20,4^2)"
+  )
+```
+
+# Exercices
+
+> Vous devez répondre aux questions suivantes dans les espaces prévus à cette fin.
+
+1. Soit $X\sim B(15,0.4)$.
+
+    a) Calculez la probabilité $P(X=4)$.
+    ```{r question1a}
+    # Écrivez votre réponse ici.
+    dbinom(4,15,0.4)
+    ```
+    
+    b) Calculez la probabilité $P(X\leq 4)$.
+    ```{r question1b}
+    # Écrivez votre réponse ici.
+    pbinom(4,15,0.4)
+    ```
+    
+    c) Calculez la probabilité $P(X>8)$.
+    ```{r question1c}
+    # Écrivez votre réponse ici.
+    1-pbinom(8,15,0.4)
+    ```
+    
+    d) Calculez la probabilité $P(X\geq 8)$.
+    ```{r question1d}
+    # Écrivez votre réponse ici.
+    1-pbinom(7,15,0.4)
+    ```
+
+2. Soit $X\sim N(0,1^2)$.
+
+    a) Calculez la probabilité $P(X<-0.5)$.
+    ```{r question2a}
+    # Écrivez votre réponse ici.
+    pnorm(-0.5,0,1)
+    ```
+    
+    b) Calculez la probabilité $P(X>1.5)$.
+    ```{r question2b}
+    # Écrivez votre réponse ici.
+    1-pnorm(1.5,0,1)
+    ```
+    
+3. Soit $X\sim N(15,3^2)$.
+
+    a) Calculez la probabilité $P(16 \leq X \leq 20)$.
+    ```{r question3a}
+    # Écrivez votre réponse ici.
+    pnorm(20,15,3)-pnorm(16,15,3)
+    ```
+    
+    b) Calculez la probabilité $P(X>18)$.
+    ```{r question3b}
+    # Écrivez votre réponse ici.
+    1-pnorm(18,15,3)
+    ```
+    
+    c) Calculez la probabilité $P(X<6)$.
+    ```{r question3c}
+    # Écrivez votre réponse ici.
+    pnorm(6,15,3)
+    ```
+    
+    d) Tracez la fonction de densité de la variable continue $X$.
+    ```{r question3d}
+    # Écrivez votre réponse ici.
+    ggplot(data = data.frame(x = c(0, 30)), aes(x)) +
+    stat_function(fun = dnorm, args = list(mean = 15, sd = 3), colour = "blue") +
+    labs(
+      x = "x",
+      y = "f(x)",
+      title = "Fonction de densité de N(15,3^2)"
+    )
+    ```
+    
+4. Représentez le graphe de la densité d’une variable $X \sim B(50,0.4)$, puis ajoutez par dessus ce graphe celui de la
+densité d’une variable $Y\sim N(20,12)$ (cela illustrera le fait que, lorsque $n > 30$, $np > 5$ et $n(1-p)>5$, on
+peut approximer la loi binomiale $B(n,p)$ par la loi normale $N(np,np(1-p))$.
+```{r question4}
+# Écrivez votre réponse ici.
+n <- 50
+p <- 0.4
+m <- n*p
+s <- sqrt(n*p*(1-p))
+fbinom <- data.frame(x = 0:n, y = dbinom(0:n, n, p))
+ggplot(fbinom, aes(x = x, y = y)) +
+  geom_bar(width = 0.1, stat = "identity", colour = "blue") +
+  stat_function(fun = dnorm, args = list(mean = m, sd = s), colour = "red") +
+  labs(
+    x = "Nombre de succès",
+    y = "Probabilité",
+    title = "La loi B(50,0.4) et la loi N(20,12)"
+  )
+```
+
+5. On sait que la probabilité qu’une personne soit allergique à un certain médicament est égale à 0.001. On s’intéresse à un échantillon de 1000 personnes. On appelle $X$ la variable aléatoire dont la valeur est le nombre de personnes allergiques dans l’échantillon.
+
+    a) Déterminez la loi de probabilité de $X$.
+    > Écrivez votre réponse ici.
+    $X\sim B(1000,0.001)$
+    
+    b) Calculez la probabilité qu’il y ait exactement deux personnes allergiques dans l’échantillon.
+    ```{r question 5b}
+    # Écrivez votre réponse ici.
+    dbinom(2,1000,0.001)
+    ```
+    
+    c) Calculez la probabilité qu’il y ait au moins deux personnes allergiques dans l’échantillon.
+    ```{r question 5c}
+    # Écrivez votre réponse ici.
+    1-pbinom(1,1000,0.001)
+    ```
+
+6. Dans une entreprise de confection, il y a en moyenne 0,3 accident par semaine.
+
+    a) Quelle est la probabilité qu’il y ait aucun accident au cours d’une semaine ?
+    ```{r question6a}
+    # Écrivez votre réponse ici.
+    dpois(0,0.3)
+    ```
+    
+    b) Quelle est la probabilité qu’il y ait au moins deux accidents en trois semaines ?
+    ```{r question6b}
+    # Écrivez votre réponse ici.
+    1-ppois(1,0.3*3)
+    ```
+    
+    c) Quelle est la probabilité qu’il y ait 38 semaines sans accident dans une année ?
+    ```{r question6c}
+    # Écrivez votre réponse ici.
+    p <- dpois(0,0.3)
+    dbinom(38,52,p)
+    ```
+    
+7. On a établi que le temps d’étude personnel hebdomadaire pour les étudiants du programme de techniques de l’informatique obéit à une loi normale de moyenne 4,58 heures et d’écart-type 1,31 heure.
+
+    a) Quelle la probabilité qu’un étudiant étudie plus de trois heures par semaine ?
+    ```{r question7a}
+    # Écrivez votre réponse ici.
+    1-pnorm(3,4.58,1.31)
+    ```
+    
+    b) On choisit au hasard et avec remise 120 étudiants du programme techniques de l’informatique. Quelle est la probabilité que pour moins de 100 d’entre eux, le temps d’étude dépasse 3 heures?
+    ```{r question7b}
+    # Écrivez votre réponse ici.
+    1-pnorm(3,4.58,1.31)
+    ```
+    
+8. Dans un port d’une grande ville, il arrive en moyenne 10 bateaux avec une cargaison de pétrole par jour. Les infrastructures du port ne peuvent traiter qu’au maximum 15 bateaux avec une cargaison de pétrole en une journée.
+
+    a) Quelle est la probabilité qu’une journée donnée qu’il y ait des bateaux qui ne puissent délivrer leur chargement de pétrole?
+    ```{r question8a}
+    # Écrivez votre réponse ici.
+    1-ppois(15,10)
+    ```
+    
+    b) Quelle est la probabilité que durant une semaine de 7 jours, il y ait 2 journées où les bateaux ne peuvent délivrer leur chargement de pétrole ?
+    ```{r question8b}
+    # Écrivez votre réponse ici.
+    p <- 1-ppois(15,10)
+    dbinom(2,7,p)
+    ```
+
+# Créer un tableau de fréquences
+
