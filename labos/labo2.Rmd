@@ -3,12 +3,12 @@ title: "T.P. Variables aléatoires et inférence statistique (Labo 2)"
 author: "Marc-André Désautels"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: no
-    latex_engine: pdflatex
   html_document:
     toc: yes
     toc_float: yes
+  pdf_document:
+    toc: no
+    latex_engine: pdflatex
 subtitle: "201-9F6-ST : Statistiques appliquées à l'informatique"
 institute: "Cégep Saint-Jean-sur-Richelieu"
 urlcolor: blue
@@ -75,12 +75,11 @@ test
 
 |Loi|Uniforme|Exponentielle|Normale|
 |:---:|:-----:|:--------:|:------:|
-|Paramètres|$(a,b)\in\mathbb{R}^2,a<b$|$p\in]0,1[$|$\lambda>0$|
-<!-- |Paramètres|$(a,b)\in\mathbb{R}^2,a<b$|$\lambda>0$|$\mu\in\mathbb{R},\sigma>0$| -->
-<!-- |$X\sim$ | $U([a,b])$ | $E(\lambda)$ | $N(\mu,\sigma^2)$ | -->
-<!-- |Ch($X$) | $[a,b]$ | $[0,\infty]$ | $\mathbb{R}$ | -->
-<!-- |$P(X=x)$ | $\frac{1}{b-a}$ | $\lambda^{-\lambda x}$ | $\frac{1}{\sqrt{2\pi \sigma^2}}e^{\tfrac{-(x-\mu)^2}{2\sigma^2}}$ | -->
-<!-- |Commandes | `dunif(x,a,b)` | `dexp(x,lambda)` | `dnorm(x,mu,sigma)` | -->
+|Paramètres|$(a,b)\in\mathbb{R}^2$|$p\in ]0,1[$|$\lambda>0$|
+|$X\sim$ | $U([a,b])$ | $E(\lambda)$ | $N(\mu,\sigma^2)$ |
+|Ch($X$) | $[a,b]$ | $[0,\infty]$ | $\mathbb{R}$ |
+|$P(X=x)$ | $\frac{1}{b-a}$ | $\lambda^{-\lambda x}$ | $\frac{1}{\sqrt{2\pi \sigma^2}}e^{\tfrac{-(x-\mu)^2}{2\sigma^2}}$ |
+|Commandes | `dunif(x,a,b)` | `dexp(x,lambda)` | `dnorm(x,mu,sigma)` |
 
 ## Exemples de calculs
 
