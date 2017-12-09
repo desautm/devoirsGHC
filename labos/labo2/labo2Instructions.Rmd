@@ -1,0 +1,229 @@
+---
+title: "T.P. Variables aléatoires et inférence statistique (Labo 2) : Instructions"
+author: "Dominique Goyette et Marc-André Désautels"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: no
+    latex_engine: pdflatex
+subtitle: "201-9F6-ST : Statistiques appliquées à l'informatique"
+institute: "Cégep Saint-Jean-sur-Richelieu"
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(questionr)
+library(titanic)
+library(knitr)
+titanic <- titanic_train
+```
+
+# Instructions:
+
+Le but de ce T. P. est de vous familiariser avec le langage `R`. Il vous faudra trouver et utiliser les commandes appropriées
+pour répondre aux questions. Vous devez vous aider de la documentation fournie dans le logiciel `RStudio` ou de la recherche `Google`. De plus, ce document contient de multiples exemples qui vous permettront de répondre aux questions se trouvant dans votre T.P.
+
+## Installer `R` et `RStudio`
+
+Vous pouvez télécharger `R` aux adresses suivantes:
+
+- Pour [Linux](http://cran.utstat.utoronto.ca/bin/linux/)
+- Pour [(Mac) OS X](http://cran.utstat.utoronto.ca/bin/macosx/)
+- Pour [Windows](http://cran.utstat.utoronto.ca/bin/windows/)
+
+Une fois le logiciel `R` installé, vous pouvez télécharger et installer le logiciel `RStudio` à l'adresse suivante:
+
+- Pour [Linux, (Mac) OS X et Windows](https://www.rstudio.com/products/rstudio/download/)
+
+# Les lois de probabilités
+
+Chaque distribution en `R` possède quatre fonctions qui lui sont associées. Premièrement, la fonction possède un _nom racine_ (qui correspond au nom de la `loi`), par exemple le _nom racine_ pour la distribution *binomiale* est `binom`. Cette racine est précédée par une de ces quatre lettre:
+
+- `p` pour *probabilité*, qui représente la fonction de répartition
+- `q` pour *quantile*, l'inverse de la fonction de répartition
+- `d` pour *densité*, la fonction de densité de la distribution
+- `r` pour *random* ou *simulation*, une variable aléatoire suivant la distribution spécifiée.
+
+Pour la loi binomiale (_nom racine_ `binom`) par exemple, ces fonctions sont `pbinom`, `qbinom`, `dbinom` et `rbinom`.
+
+Nous avons donc:
+
+|Loi: `loi`|Densité|Fonction de répartition|Quantile|Simulation|
+|:--------:|:-----:|:---------------------:|:------:|:--------:|
+|Notations|$f(x)$ ou $P(X=x)$|$F(x)$|valeur liée à $F(x)$|$x_1$, $x_2$, ..., $x_n$|
+|Commandes|`dloi`|`ploi`|`qloi`|`rloi`|
+
+Les noms de lois les plus célèbres sont : `norm` (pour la loi normale), `norm` (pour la loi binomiale), `unif` (pour la loi uniforme), `geom` (pour la loi géométrique), `pois` (pour la loi de Poisson), `t` (pour la loi de Student), `chisq` (pour la loi du Chi-deux), `exp` (pour la loi exponentielle), `f` (pour la loi de Fisher)...
+
+## Commandes
+
+Si la loi de $X$ dépend d’un ou de plusieurs paramètres, disons `par1` et `par2`, alors la densité de $X$ en $x$ est donnée par la commande : `dloi(x, par1, par2)`
+
+Quelques exemples sont décrits ci-dessous:
+
+|Loi|Binomiale|Géométrique|Poisson|
+|:----------------:|:-----------------------:|:------------------------------:|:-------------------------:|
+|Paramètres|$n\in\mathbb{N}$, $p\in]0,1[$|$p\in]0,1[$|$\lambda>0$|
+|$X\sim$|$B(n;p)$|$G(p)$|$Po(\lambda)$|
+|Ch($X$)|$\left\{0,1,\ldots,n\right\}$|$\mathbb{N}$|$\mathbb{N}$|
+|$P(X=x)$|$C_x^np^xq^{n-x}$|$p(1-p)^x$|$e^{-\lambda}\frac{\lambda^x}{x!}$|
+|Commandes|`dbinom(x,n,p)`|`dgeom(x,p)`|`dpois(x,lambda)`|
+
+|    Loi   |     Uniforme    |      Exponentielle     |                  Normale                          |
+|:----------------:|:-----------------------:|:------------------------------:|:-------------------------:|
+|Paramètres|$(a,b)\in\mathbb{R}^2$|$p\in]0,1[$|$\lambda>0$|
+|$X\sim$ | $U([a,b])$ | $E(\lambda)$ | $N(\mu,\sigma^2)$ |
+|Ch($X$) | $[a,b]$ | $[0,\infty]$ | $\mathbb{R}$ |
+|$P(X=x)$ | $\frac{1}{b-a}$ | $\lambda^{-\lambda x}$ | $\dfrac{1}{\sqrt{2\pi \sigma^2}}e^{\frac{-(x-\mu)^2}{2\sigma^2}}$|
+|Commandes | `dunif(x,a,b)` | `dexp(x,lambda)` | `dnorm(x,mu,sigma)` |
+
+## Exemples de calculs
+
+Soit $X$ une variable aléatoire telle que $X\sim B(8,0.3)$.
+
+1. Pour calculer $P(X=4)$, nous devons utiliser la commande suivante:
+```{r}
+dbinom(4,8,0.3)
+```
+Ceci signifie que $P(X=4)=`r dbinom(4,8,0.3)`$.
+
+2. Pour calculer $P(X\leq 4)$, nous devons utiliser la commande suivante:
+```{r}
+pbinom(4,8,0.3)
+```
+Ceci signifie que $P(X\leq 4)=`r pbinom(4,8,0.3)`$.
+
+3. Pour calculer $P(X> 4)$, nous pouvons utiliser une des commandes suivantes:
+```{r}
+pbinom(4,8,0.3,lower.tail = FALSE)
+1-pbinom(4,8,0.3)
+```
+Ceci signifie que $P(X>4)=`r 1-pbinom(4,8,0.3)`$.
+
+4. Pour calculer $P(X\geq 4)=1-P(X\leq 3)$, nous pouvons utiliser la commande suivante:
+```{r}
+1-pbinom(3,8,0.3)
+```
+Ceci signifie que $P(X\geq 4)=`r 1-pbinom(3,8,0.3)`$.
+
+## Représentation graphique
+
+### Les lois de probabilités discrètes
+
+Nous pouvons représenter graphiquement la loi binomiale. Soit $X~B(8,0.3)$. Nous aurons:
+
+```{r}
+n <- 8
+p <- 0.3
+fbinom <- data.frame(x = 0:n, y = dbinom(0:n, n, p))
+ggplot(fbinom, aes(x = x, y = y)) +
+  geom_bar(width = 0.05, stat = "identity", fill = "blue") +
+  labs(
+    x = "Nombre de succès",
+    y = "Probabilité",
+    title = "Fonction de densité de B(8,0.3)"
+  )
+```
+
+### Les lois de probabilités continues
+
+Nous pouvons représenter graphiquement la loi normale. Soit $X\sim N(5,1.5^2)$. Nous aurons:
+
+```{r}
+ggplot(data = data.frame(x = c(0, 10)), aes(x)) +
+  stat_function(fun = dnorm, args = list(mean = 5, sd = 1.5), colour = "blue") +
+  labs(
+    x = "x",
+    y = "f(x)",
+    title = "Fonction de densité de N(5,1.5^2)"
+  )
+```
+
+Nous pouvons également superposer plusieurs fonctions de densité. Par exemple, nous allons représenter la loi $N(10, 3^2)$ et la loi $N(8,5^2)$ sur le même graphique.
+
+```{r}
+ggplot(data = data.frame(x = c(-5, 20)), aes(x)) +
+  stat_function(fun = dnorm, args = list(mean = 10, sd = 3), colour = "blue") +
+  stat_function(fun = dnorm, args = list(mean = 8, sd = 5), colour = "red") +
+  labs(
+    x = "x",
+    y = "f(x)",
+    title = "Les densités de N(10,3^2) et de N(8,5^2)"
+  )
+```
+
+Nous pouvons aussi superposer une variable aléatoire discrète et une variable aléatoire continue. Dans l'exemple suivant, nous avons la loi $B(100,0.2)$ et son approximation par la loi normale $N(20,4^2)$.
+
+```{r}
+n <- 100
+p <- 0.2
+m <- n*p
+s <- sqrt(n*p*(1-p))
+fbinom <- data.frame(x = 0:n, y = dbinom(0:n, n, p))
+ggplot(fbinom, aes(x = x, y = y)) +
+  geom_bar(width = 0.1, stat = "identity", colour = "blue") +
+  stat_function(fun = dnorm, args = list(mean = m, sd = s), colour = "red") +
+  labs(
+    x = "Nombre de succès",
+    y = "Probabilité",
+    title = "La loi B(100,0.2) et la loi N(20,4^2)"
+  )
+```
+
+## Créer un tableau de fréquences
+
+Pour créer un tableau de fréquences pour une variable aléatoire qualitative ou quantitative discrète, nous utilisons la commande `freq` de la librairie `questionr`.
+
+### Variable aléatoire qualitative ou quantitative discrète
+
+Par exemple, pour représenter le tableau de fréquences pour la variable `Sex` pour les données du Titanic, on pourrait utiliser la commande suivante:
+```{r}
+kable(freq(titanic$Sex,
+     exclud = NA,
+     cum = FALSE,
+     total = TRUE))
+```
+
+L'option `exclud = NA` permet d'exclure les valeurs manquantes, l'option `cum = FALSE` permet de ne **pas** afficher les pourcentages cumulés et l'option `total = TRUE` permet d'ajouter le total.
+
+### Variable aléatoire quantitative continue
+
+Par exemple, pour représenter le tableau de fréquences de la variable `Fare` (prix payé pour la croisière sur le Titanic) il faut tout d'abord créer le vecteur `Prix`  et créer de nouvelles classes (pour se faire, nous utilisons la commande `cut`). Ensuite, nous utilisons la commande `levels` pour renommer nos classes.
+```{r}
+Prix <- cut(titanic$Fare,breaks=c(0,20,40,60,80,600))
+levels(Prix) <- c("0$ à 20$","20$ à 40$","40$ à 60$","60$ à 80$","80$ à 600$")
+kable(freq(Prix,
+     exclud = NA,
+     cum = FALSE,
+     total = TRUE))
+```
+
+## Tableau de contingence
+
+Par exemple, pour représenter le tableau de contingence pour les variables `Fare` (prix payé pour la croisière sur le Titanic) et `Survived` (Survie au naufrage (0 = Non ; 1 = Oui)) il faut tout simplement se créer un vecteur pour la variable `Survived` en utilisant la commande suivante:
+```{r}
+Survie <- titanic$Survived
+```
+
+On peut afficher le tableau des fréquences obervées:
+```{r}
+addmargins(table(Survie,Prix))
+```
+
+ou alors le tableau des fréquences relatives:
+```{r}
+prop(table(Survie,Prix),digits=2)
+```
+
+# Estimation de paramètres et tests d'hypothèses
+
+## Estimation de paramètres
+
+## Test d'hypothèses
+
+### Test d'indépendance
