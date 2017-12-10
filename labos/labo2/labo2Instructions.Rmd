@@ -4,6 +4,7 @@ author: "Dominique Goyette et Marc-André Désautels"
 date: "`r Sys.Date()`"
 output:
   html_document:
+    keep_md: true
     toc: yes
     toc_float: yes
   pdf_document:
@@ -20,6 +21,7 @@ library(ggplot2)
 library(questionr)
 library(titanic)
 library(knitr)
+library(broom)
 titanic <- titanic_train
 ```
 
@@ -177,21 +179,34 @@ ggplot(fbinom, aes(x = x, y = y)) +
 
 ## Créer un tableau de fréquences
 
-Pour créer un tableau de fréquences pour une variable aléatoire qualitative ou quantitative discrète, nous utilisons la commande `freq` de la librairie `questionr`.
+Pour créer un tableau de fréquences pour une variable aléatoire qualitative ou quantitative discrète, nous utilisons la commande `table` ou la commande `freq` de la librairie `questionr`.
 
 ### Variable aléatoire qualitative ou quantitative discrète
 
-Par exemple, pour représenter le tableau de fréquences pour la variable `Sex` pour les données du Titanic, on pourrait utiliser la commande suivante:
+Créez un tableau de la variable `cut` de la base de données `diamonds`.
 ```{r}
-kable(freq(titanic$Sex,
-     exclud = NA,
-     cum = FALSE,
-     total = TRUE))
+table(diamonds$cut)
 ```
 
-L'option `exclud = NA` permet d'exclure les valeurs manquantes, l'option `cum = FALSE` permet de ne **pas** afficher les pourcentages cumulés et l'option `total = TRUE` permet d'ajouter le total.
+Nous pouvons également utiliser la commande `freq` de la librairie `questionr`.
+```{r}
+freq(diamonds$cut,
+     exclud = NA,
+     digits = 2,
+     cum = TRUE,
+     total = TRUE)
+```
+
+L'option `exclud = NA` permet d'exclure les valeurs manquantes, l'option `cum = TRUE` permet d'afficher les pourcentages cumulés et l'option `total = TRUE` permet d'ajouter le total.
 
 ### Variable aléatoire quantitative continue
+
+```{r}
+Prix <- cut(diamonds$price, breaks = seq(from = 0, to = 20000, by = 2000), include.lowest = TRUE, right = FALSE)
+levels(Prix) <- c("0 à 2000$","2000 à 4000$","4000 à 6000$","6000 à 8000$","8000 à 10000$","10000 à 12000$","12000 à 14000$","14000 à 16000$","16000 à 18000$","18000 à 20000$")
+freq(Prix)
+```
+
 
 Par exemple, pour représenter le tableau de fréquences de la variable `Fare` (prix payé pour la croisière sur le Titanic) il faut tout d'abord créer le vecteur `Prix`  et créer de nouvelles classes (pour se faire, nous utilisons la commande `cut`). Ensuite, nous utilisons la commande `levels` pour renommer nos classes.
 ```{r}
@@ -223,6 +238,39 @@ prop(table(Survie,Prix),digits=2)
 # Estimation de paramètres et tests d'hypothèses
 
 ## Estimation de paramètres
+
+### Les intervalles de confiance sur une moyenne
+
+Nous allons trouver un intervalle de confiance au niveau de 95% de la moyenne du prix des diamants.
+```{r}
+tidy(t.test(diamonds$price,
+            conf.level = 0.95))
+```
+
+Nous allons trouver un intervalle de confiance au niveau de 99% de la moyenne du prix des diamants.
+```{r}
+tidy(t.test(diamonds$price,
+            conf.level = 0.99))
+```
+
+### Les intervalles de confiance sur une proportion
+
+Trouvons la proportion de diamants de type `Ideal`.
+```{r}
+prop.table(table(diamonds$cut))
+```
+
+La proportion est donc de $`r prop.table(table(diamonds$cut))[5]`$. Nous allons faire trouver un intervalle de confiance au niveau de 95% de la proportion dans la population des diamants de type `Ideal`.
+```{r}
+tidy(prop.test(with(diamonds,table(cut!="Ideal"))))
+```
+
+Pour trouver un intervalle de confiance à 99%.
+```{r}
+tidy(prop.test(with(diamonds,table(cut!="Ideal")),
+                 conf.level = 0.99))
+```
+
 
 ## Test d'hypothèses
 
