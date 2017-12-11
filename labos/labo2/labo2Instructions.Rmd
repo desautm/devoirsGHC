@@ -7,10 +7,6 @@ output:
     toc: no
     latex_engine: pdflatex
   html_document:
-<<<<<<< HEAD
-=======
-    keep_md: true
->>>>>>> 31af959a124decf1f176658835e3c4438fedb345
     toc: yes
     toc_float: yes
 subtitle: "201-9F6-ST : Statistiques appliquées à l'informatique"
