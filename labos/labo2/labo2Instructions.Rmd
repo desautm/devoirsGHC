@@ -3,26 +3,24 @@ title: "T.P. Variables aléatoires et inférence statistique (Labo 2) : Instruct
 author: "Dominique Goyette et Marc-André Désautels"
 date: "`r Sys.Date()`"
 output:
-  html_document:
-    keep_md: true
-    toc: yes
-    toc_float: yes
   pdf_document:
     toc: no
     latex_engine: pdflatex
+  html_document:
+    toc: yes
+    toc_float: yes
 subtitle: "201-9F6-ST : Statistiques appliquées à l'informatique"
 institute: "Cégep Saint-Jean-sur-Richelieu"
 urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, tidy = TRUE)
 library(ggplot2)
 library(questionr)
-library(titanic)
 library(knitr)
 library(broom)
-titanic <- titanic_train
+library(MASS)
 ```
 
 # Instructions:
@@ -201,38 +199,43 @@ L'option `exclud = NA` permet d'exclure les valeurs manquantes, l'option `cum = 
 
 ### Variable aléatoire quantitative continue
 
+Nous allons créer un tableau de fréquences d'une variable quantitative continue. Pour débuter, nous devons transformer cette variable quantitative en variable qualitative en la découpant en classe à l'aide de la commande `cut`. La commande `seq(from = 0, to = 20000, by = 2000)` permet de découper nos valeurs en partant de 0 jusqu'à 20 000 par sauts de 2 000. Nous incluons la côté gauche et excluons le côté droit.
+
 ```{r}
-Prix <- cut(diamonds$price, breaks = seq(from = 0, to = 20000, by = 2000), include.lowest = TRUE, right = FALSE)
-levels(Prix) <- c("0 à 2000$","2000 à 4000$","4000 à 6000$","6000 à 8000$","8000 à 10000$","10000 à 12000$","12000 à 14000$","14000 à 16000$","16000 à 18000$","18000 à 20000$")
-freq(Prix)
+Prix <- cut(diamonds$price, breaks = seq(from = 0, to = 20000, by = 2000), 
+            include.lowest = TRUE, right = FALSE)
 ```
 
+Nous voulons ensuite renommer nos classes à l'aide de la commande `levels`.
 
-Par exemple, pour représenter le tableau de fréquences de la variable `Fare` (prix payé pour la croisière sur le Titanic) il faut tout d'abord créer le vecteur `Prix`  et créer de nouvelles classes (pour se faire, nous utilisons la commande `cut`). Ensuite, nous utilisons la commande `levels` pour renommer nos classes.
 ```{r}
-Prix <- cut(titanic$Fare,breaks=c(0,20,40,60,80,600))
-levels(Prix) <- c("0$ à 20$","20$ à 40$","40$ à 60$","60$ à 80$","80$ à 600$")
-kable(freq(Prix,
+levels(Prix) <- c("0 à 2000$","2000 à 4000$","4000 à 6000$","6000 à 8000$",
+                  "8000 à 10000$","10000 à 12000$","12000 à 14000$","14000 à 16000$",
+                  "16000 à 18000$","18000 à 20000$")
+```
+
+Nous pouvons maintenant afficher le tableau à l'aide de la commande `freq`.
+
+```{r}
+freq(Prix,
      exclud = NA,
-     cum = FALSE,
-     total = TRUE))
+     digits = 2,
+     cum = TRUE,
+     total = TRUE)
 ```
 
 ## Tableau de contingence
 
-Par exemple, pour représenter le tableau de contingence pour les variables `Fare` (prix payé pour la croisière sur le Titanic) et `Survived` (Survie au naufrage (0 = Non ; 1 = Oui)) il faut tout simplement se créer un vecteur pour la variable `Survived` en utilisant la commande suivante:
+Nous voulons représenter le tableau de contingence de la variable `color` et de la variable `cut`. Nous utilisons la commande `table` et la commande `addmargins` pour ajouter une colonne et une ligne total.
+
 ```{r}
-Survie <- titanic$Survived
+addmargins(table(diamonds$color,diamonds$cut))
 ```
 
-On peut afficher le tableau des fréquences obervées:
-```{r}
-addmargins(table(Survie,Prix))
-```
+Nous pouvons utiliser la commande `prop` avec la commande `table` pour obtenir un tableau des fréquences relatives.
 
-ou alors le tableau des fréquences relatives:
 ```{r}
-prop(table(Survie,Prix),digits=2)
+prop(table(diamonds$color,diamonds$cut),digits=2)
 ```
 
 # Estimation de paramètres et tests d'hypothèses
@@ -243,15 +246,18 @@ prop(table(Survie,Prix),digits=2)
 
 Nous allons trouver un intervalle de confiance au niveau de 95% de la moyenne du prix des diamants.
 ```{r}
-tidy(t.test(diamonds$price,
-            conf.level = 0.95))
+ConfPrice95 <- t.test(diamonds$price,conf.level = 0.95)
+tidy(ConfPrice95)
 ```
+
+Au niveau de confiance de 95%, le prix moyen des diamants se situe entre `r ConfPrice95$conf.int[1]` et `r ConfPrice95$conf.int[2]`.
 
 Nous allons trouver un intervalle de confiance au niveau de 99% de la moyenne du prix des diamants.
 ```{r}
-tidy(t.test(diamonds$price,
-            conf.level = 0.99))
+ConfPrice99 <- t.test(diamonds$price,conf.level = 0.99)
+tidy(ConfPrice99)
 ```
+Au niveau de confiance de 99%, le prix  moyen des diamants se situe entre `r ConfPrice99$conf.int[1]` et `r ConfPrice99$conf.int[2]`.
 
 ### Les intervalles de confiance sur une proportion
 
@@ -262,16 +268,125 @@ prop.table(table(diamonds$cut))
 
 La proportion est donc de $`r prop.table(table(diamonds$cut))[5]`$. Nous allons faire trouver un intervalle de confiance au niveau de 95% de la proportion dans la population des diamants de type `Ideal`.
 ```{r}
-tidy(prop.test(with(diamonds,table(cut!="Ideal"))))
+ConfCut95 <- prop.test(with(diamonds,table(cut!="Ideal")),conf.level = 0.95)
+tidy(ConfCut95)
 ```
+
+Au niveau de confiance de 95%, la proportion moyenne des diamants de type `Ideal` se trouve entre `r ConfCut95$conf.int[1]` et `r ConfCut95$conf.int[2]`.
 
 Pour trouver un intervalle de confiance à 99%.
 ```{r}
-tidy(prop.test(with(diamonds,table(cut!="Ideal")),
-                 conf.level = 0.99))
+ConfCut99 <- prop.test(with(diamonds,table(cut!="Ideal")),conf.level = 0.99)
+tidy(ConfCut99)
 ```
 
+Au niveau de confiance de 99%, la proportion moyenne des diamants de type `Ideal` se trouve entre `r ConfCut99$conf.int[1]` et `r ConfCut99$conf.int[2]`.
 
-## Test d'hypothèses
+# Test d'hypothèses
 
-### Test d'indépendance
+## Le test d'hypothèses sur une moyenne
+
+Nous pouvons faire un test d'hypothèses bilatéral de niveau de confiance 95% sur la moyenne du prix des diamants. Par exemple, nous allons tenter de vérifier si le prix des diamants est **différent** de 3 900$.
+```{r}
+PrixDiff <- t.test(diamonds$price, 
+            mu = 3900,
+            alternative = "two.sided",
+            paired = FALSE, 
+            var.equal = FALSE, 
+            conf.level = 0.95)
+tidy(PrixDiff)
+```
+Au niveau de confiance de 95%, nous ne pouvons pas conclure que le prix des diamants est différent de 3 900$ car nous obtenons une __p-value__ de $`r PrixDiff$p.value*100`$%. 
+
+Nous pouvons vérifier si le prix des diamants est **plus grand** que 3 900$ au niveau de confiance de 90%.
+```{r}
+PrixPlusGrand <- t.test(diamonds$price, 
+                  mu = 3900,
+                  alternative = "greater",
+                  paired = FALSE, 
+                  var.equal = FALSE, 
+                  conf.level = 0.90)
+tidy(PrixPlusGrand)
+```
+Au niveau de confiance de 90%, nous pouvons conclure que le prix des diamants est plus grand que 3 900$ car nous obtenons une __p-value__ de $`r PrixPlusGrand$p.value*100`$%. 
+
+## Le test d'hypothèses sur une proportion
+
+Nous pouvons faire un test d'hypothèses unilatéral de niveau de confiance 95% sur la proportion de diamants de type `Ideal`. Par exemple, nous allons tenter de vérifier si la proportion des diamants de type `Ideal` est **plus petite** que 0,405.
+```{r}
+IdealPlusPetit <- prop.test(with(diamonds,table(cut!="Ideal")),
+                    p = 0.405,
+                    alternative = "less",
+                    conf.level = 0.95)
+tidy(IdealPlusPetit)
+```
+Au niveau de confiance de 95%, nous pouvons conclure que la proportion de diamants de type `Ideal` est plus petite que 0,405 car nous obtenons une __p-value__ de $`r IdealPlusPetit$p.value*100`$%.
+
+
+## Les tests d'hypothèses sur une différence de deux moyennes
+
+Nous pouvons faire un test d'hypothèses sur la différence entre le prix moyen des diamants de coupe `Ideal` et de coupe `Premium` au niveau de confiance  de 99%.
+```{r}
+IdealPremiumDiff <- t.test(formula = price ~ cut,
+                      data = diamonds,
+                      subset = cut %in% c("Ideal", "Premium"),
+                      alternative = "two.sided",
+                      paired = FALSE,
+                      var.equal = FALSE,
+                      conf.level = 0.99)
+tidy(IdealPremiumDiff)
+```
+Au niveau de confiance de 99%, nous pouvons conclure que la moyenne de prix des diamants `Ideal` est différente de la moyenne de prix des diamants `Premium` car nous obtenons une __p-value__ de $`r IdealPremiumDiff$p.value*100`$%.
+
+Pour faire un test d'hypothèses sur une différence de moyennes lorsque les échantillons sont pairés, nous allons utiliser une base de données disponible dans `R`, la base de données `immer`. Celle-ci donne la production d'orge pour les années 1931 et 1932. On peut la visualiser en utilisant la commande `head`.
+```{r}
+head(immer)
+```
+
+Nous allons faire un test d'hypothèses bilatéral sur la différence de production d'orge entre les années 1931 et 1932 au niveau de confiance de 95%.
+```{r}
+BarleyPaired <- t.test(immer$Y1, 
+                       immer$Y2,
+                       paired=TRUE)
+tidy(BarleyPaired)
+```
+Au niveau de confiance de 95%, nous pouvons conclure que la moyenne de production d'orge est différente entre 1931 et 1932 car nous obtenons une __p-value__ de $`r BarleyPaired$p.value*100`$%.
+
+## Les tests d'hypothèses sur une différence de deux proportions
+
+Nous pouvons faire un test sur la différence de poportions entre les diamants de coupe `Ideal` et les diamants de couleur `E`.
+```{r}
+PropPremiumE <- prop.test(with(diamonds,table(cut == "Premium",color == "E")))
+tidy(PropPremiumE)
+```
+Au niveau de confiance de 95%, nous pouvons conclure que la proportion de diamants `Ideal` et de diamants de couleur `E` est différente car nous obtenons une __p-value__ de $`r PropPremiumE$p.value*100`$%.
+
+## Le test du $\chi^2$ pour une variable
+
+Voici le tableau représentant la variable `cut`.
+```{r}
+table(diamonds$cut)
+```
+
+Nous voulons faire un test du $\chi^2$ pour savoir si toutes les modalités de la variable `cut` sont présentes de façon égales.
+```{r}
+ChiCut <- chisq.test(x = table(diamonds$cut))
+tidy(ChiCut)
+```
+
+Au niveau de confiance de 95%, nous pouvons conclure que la variable `cut` ne suit pas une loi untiforme car nous obtenons une __p-value__ de $`r ChiCut$p.value*100`$%.
+
+## Le test du $\chi^2$ pour deux variables
+
+Voici le tableau représentant la variable `cut` et la variable `color`.
+```{r}
+table(diamonds$cut,diamonds$color)
+```
+
+Nous voulons faire un test du $\chi^2$ pour savoir si la  variable `cut` dépend de la variable `color`.
+```{r}
+ChiCutColor <- chisq.test(x = table(diamonds$cut, diamonds$color))
+tidy(ChiCutColor)
+```
+
+Au niveau de confiance de 95%, nous pouvons conclure que les variables `cut` et `color` sont dépendantes car nous obtenons une __p-value__ de $`r ChiCutColor$p.value*100`$%.
