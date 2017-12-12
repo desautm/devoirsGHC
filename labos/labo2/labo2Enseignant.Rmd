@@ -3,12 +3,11 @@ title: "T.P. Variables aléatoires et inférence statistique (Labo 2) : Version 
 author: "Dominique Goyette et Marc-André Désautels"
 date: "`r Sys.Date()`"
 output:
+  html_document:
+    toc: no
   pdf_document:
     toc: no
     latex_engine: pdflatex
-  html_document:
-    toc: yes
-    toc_float: yes
 subtitle: "201-9F6-ST : Statistiques appliquées à l'informatique"
 institute: "Cégep Saint-Jean-sur-Richelieu"
 urlcolor: blue
@@ -20,6 +19,7 @@ library(ggplot2)
 library(questionr)
 library(titanic)
 library(knitr)
+library(broom)
 titanic <- titanic_train
 ```
 
@@ -124,6 +124,7 @@ ggplot(fbinom, aes(x = x, y = y)) +
 5. On sait que la probabilité qu’une personne soit allergique à un certain médicament est égale à 0.001. On s’intéresse à un échantillon de 1000 personnes. On appelle $X$ la variable aléatoire dont la valeur est le nombre de personnes allergiques dans l’échantillon.
 
     a) Déterminez la loi de probabilité de $X$.
+    
     > Écrivez votre réponse ici.
     $X\sim B(1000,0.001)$
     
@@ -189,49 +190,161 @@ ggplot(fbinom, aes(x = x, y = y)) +
     dbinom(2,7,p)
     ```
 
-9. Nous voulons faire un test d'hypothèses pour savoir s'il y a une dépendance entre les variables `PClass` (qui indique la classe où se trouvait le passager à bord du Titanic) et `Survived` (qui indique si le passager survit (1) au naufrage ou meurt (0)).
+9. Nous voulons faire un test d'hypothèses pour savoir s'il y a une dépendance entre les variables `PClass` (qui indique la classe où se trouvait le passager à bord du Titanic) et `Survived` (qui indique si le passager survit (1) au naufrage ou meurt (0)). La base de données du titanic est déjà chargée dans le document et elle se nomme `titanic`.
 
-    a) Créez le vecteur `Classe` qui indique dans quelle classe se situait les passagers à bord du Titanic.
+    a) Créez le vecteur `Classe` (à l'aide de la variable `PClass`) qui indique dans quelle classe se situait les passagers à bord du Titanic.
 
     ```{r question9a}
+    # Écrivez votre réponse ici.
     Classe <- titanic$Pclass
     ```
 
-    b) Créez le vecteur `Survie` qui indique si le passager est mort ou si il a survécu au naufrage du Titanic.
+    b) Créez le vecteur `Survie` (à l'aide de la variable `Survived`) qui indique si le passager est mort ou si il a survécu au naufrage du Titanic.
     ```{r question9b}
+    # Écrivez votre réponse ici.
     Survie <- titanic$Survived
     ```
 
-    c) Créez un tableau de fréquences observées des variables `Classe` et `Survie`.
+    c) Créez un tableau de fréquences observées des variables `Classe` et `Survie` et appelez-le `Tableau`.
     ```{r question9c}
+    # Écrivez votre réponse ici.
     Tableau <- table(Classe,Survie)
     ```
 
     d) Affichez le tableau de fréquences observées des variables `Classe` et `Survie`.
     ```{r question9d}
+    # Écrivez votre réponse ici.
     Tableau
     ```
 
     e) Dans cet échantillon, quel est le taux de mortalité en première classe?
     ```{r question9e}
-    PropTableau <- prop(Tableau)
+    # Écrivez votre réponse ici.
+    PropTableau <- prop(Tableau, digits = 2)
     PropTableau
-    PropTableau[1,3]
+    PropTableau[1,1]
     ```
     
-    f) Dans cet échantillon, quel est le taux de mortalité en première classe?
+    f) Dans cet échantillon, quel est le taux de mortalité en troisième classe?
     ```{r question9f}
-    PropTableau <- prop(Tableau)
+    # Écrivez votre réponse ici.
+    PropTableau <- prop(Tableau, digits = 2)
     PropTableau
-    PropTableau[3,3]
+    PropTableau[3,1]
     ```
     
-    g) Faites un test d’indépendance du Khi-deux (test d’hypothèses) au seuil de signification de 0.5% avec le tableau, donnez votre décision et interprétez le résultat.(remarque : La commande pour faire un test d’indépendance du Khi-deux est `chisq.test(Tableau)`
+    g) Faites un test d’indépendance du Khi-deux (test d’hypothèses) au seuil de signification de 0.5% avec le tableau `Tableau`, donnez votre décision et interprétez le résultat.
     ```{r question9g}
+    # Écrivez votre réponse ici.
     chisq.test(Tableau)
     ```
     
     Puisque la p-value est plus petite que $`r chisq.test(Tableau)$p.value`$, alors nous rejettons $H_0$ et nous acceptons $H_1$. Ceci signifie qu'il y a un lien entre le fait qu'un passager survive et sa classe.
 
-10. 
+10. Nous voulons faire un test d'hypothèses pour savoir s'il y a une dépendance entre les variables `Price` (qui représente le prix payé pour la croisière) et `Survived` (qui indique si le passager survit (1) au naufrage ou meurt (0)). La base de données du titanic est déjà chargée dans le document et elle se nomme `titanic`.
+
+    a) Définissez la variable `Prix` qui représente le prix payé pour la croisière. La variable du prix est encodée dans la variable `Fare`.
+    ```{r question10a}
+    # Écrivez votre réponse ici.
+    Prix <- titanic$Fare
+    ```
     
+    b) Créez la variable `PrixClasse` en utilisant les classes suivantes: 0 à 20, 20 à 40, 40 à 60, 60 à 80 et 80 à 600.
+    ```{r question10b}
+    # Écrivez votre réponse ici.
+    PrixClasse <- cut(Prix, breaks = c(0,20,40,60,80,600),
+                include.lowest = TRUE, right = FALSE)
+    ```
+    
+    c) Identifiez les classes en utilisant la commande `levels` et en ajoutant des unités en dollars.
+    ```{r question10c}
+    # Écrivez votre réponse ici.
+    levels(PrixClasse) <- c("0 à 20$","20 à 40$","40 à 60$","60 à 80$","80 à 600$")
+    ```
+    
+    d) Créez le tableau `Tableau2` des fréquences observées des variables `Survie` et `PrixClasse`.
+    ```{r question10d}
+    # Écrivez votre réponse ici.
+    Tableau2 <- table(Survie,PrixClasse)
+    ```
+    
+    e) Affichez `Tableau2`.
+    ```{r question10e}
+    # Écrivez votre réponse ici.
+    Tableau2
+    ```
+    
+    f) Calculer le taux de mortalité des personnes ayant payé leur billet plus de 80$ et comparer ce résultat avec le taux de mortalité de ceux qui ont payé leur billet entre 60 et 80$.
+    ```{r}
+    # Écrivez votre réponse ici.
+    Tableau2Prop <- prop(Tableau2)
+    Tableau2Prop
+    ```
+    Le taux de mortalité des personnes ayant payé leur billet plus de 80$ est de `r Tableau2Prop[1,5]`% et celui de ceux qui ont payé leur billet entre 60 et 80$ est de `r Tableau2Prop[1,4]`%.
+    
+    g) Faites un test d’indépendance du Khi-deux au seuil de signification de 0.5% avec le `Tableau2`, donnez votre décision et interprétez le résultat.
+    ```{r question10g}
+    # Écrivez votre réponse ici.
+    chisq.test(Tableau2)
+    ```
+    
+    Puisque la p-value est plus petite que $`r chisq.test(Tableau2)$p.value`$, alors nous rejettons $H_0$ et nous acceptons $H_1$. Ceci signifie qu'il y a un lien entre le fait qu'un passager survive et le prix de son billet.
+    
+11. Y a-t-il dépendance ou indépendance entre les variables lieu d’embarquement `Embarked` et survie ou non au naufrage? Faites un test d’indépendance du Khi-deux avec $\alpha$ = 0,5%.
+
+```{r question11}
+# Écrivez votre réponse ici.
+ChiEmbarkedSurvived <- chisq.test(table(titanic$Embarked,Survie))
+ChiEmbarkedSurvived
+```
+
+> Écrivez votre justification ci-dessous.
+
+Puisque la p-value est plus égale à $`r ChiEmbarkedSurvived$p.value`$, alors nous rejettons $H_0$ et nous acceptons $H_1$. Ceci signifie qu'il y a un lien entre le fait qu'un passager survive et le lieu de son embarquement.
+
+12. Y a-t-il dépendance ou indépendance entre les variables sexe `Sex` et survie ou non au naufrage? Faites un test d’indépendance du Khi-deux avec $\alpha$ = 0,5%.
+
+```{r question12}
+# Écrivez votre réponse ici.
+ChiSexSurvived <- chisq.test(table(titanic$Sex,Survie))
+ChiSexSurvived
+```
+
+> Écrivez votre justification ci-dessous.
+
+Puisque la p-value est plus petite que $`r ChiSexSurvived$p.value`$, alors nous rejettons $H_0$ et nous acceptons $H_1$. Ceci signifie qu'il y a un lien entre le fait qu'un passager survive et son sexe.
+
+13. Y a-t-il dépendance ou indépendance entre les variables prix payé du billet pour les passagers de la première classe et la survie ou non au naufrage de ces mêmes passagers ? On vous demande de créer 2 classes soit ceux qui ont payé entre 0 et 160$ et ceux qui ont payé entre 160 et 600$. Faites un test d’indépendance du Khi-deux avec $\alpha$ = 0,5%.
+
+```{r question13}
+# Écrivez votre réponse ici.
+# Pour vous aider, nous avons créé une base de données ne contenant que les passagers de première classe.
+Classe1 <- subset(titanic,Pclass == 1)
+PrixClasse1 <- cut(Classe1$Fare, breaks = c(0,160,600), include.lowest = TRUE, right = FALSE)
+levels(PrixClasse1) <- c("0 à 160$","160 à 600$")
+SurvieClasse1 <- Classe1$Survived
+ChiPrixSurvie1 <- chisq.test(table(PrixClasse1,SurvieClasse1))
+ChiPrixSurvie1
+```
+
+> Écrivez votre justification ci-dessous.
+
+Puisque la p-value est plus égale à $`r ChiPrixSurvie1$p.value`$, alors nous conservons $H_0$. Ceci signifie que les variables prix du billet payé et survie des passagers de première classe sont indépendantes.
+
+14. Trouvez l'intervalle de confiance de la moyenne des âges (`Age`) des passagers du Titanic au niveau de confiance de 99,9%.
+
+```{r question14}
+ConfAge99.9 <- t.test(titanic$Age,conf.level = 0.999)
+tidy(ConfAge99.9)
+```
+
+Au niveau de confiance de 99,9%, l'âge moyen des passagers du Titanic se situe entre `r ConfAge99.9$conf.int[1]` ans et `r ConfAge99.9$conf.int[2]` ans.
+
+15. Trouvez l'intervalle de confiance de la proportion des passagers de sexe (`Sex`) masculin du Titanic au niveau de confiance de 98%.
+
+```{r}
+ConfSex98 <- prop.test(with(titanic,table(Sex!="male")),conf.level = 0.98)
+tidy(ConfSex98)
+```
+
+Au niveau de confiance de 98%, la proportion moyenne des passagers de sexe masculin du Titanic se situe entre `r ConfSex98$conf.int[1]`  et `r ConfSex98$conf.int[2]`.
